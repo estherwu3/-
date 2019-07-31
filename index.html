@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Anton|Noto+Sans+TC&display=swap" rel="stylesheet">
+    <title>Document</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 0;
+            font-family: 'Anton', sans-serif;
+            font-family: 'Noto Sans TC', sans-serif;
+            color:rgb(0, 0, 0);
+        }
+        #game {
+            width:1920px;
+            height: 700px;
+            background-image: url(./img/b1.jpg);
+            cursor: url(./img/cursor.png) 50 50, auto;
+            overflow: hidden;
+            position: relative;
+        }
+        .zb{
+            height: 250px;
+            position: absolute;
+        }
+        h1{
+            color:blue;
+        }
+        #start{
+            border-radius:100%;
+            box-sizing: border-box;
+            font-family: 'Anton', sans-serif;
+            font-size: 27px;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>狙擊海王</h1>
+    <input type="button" value="START" id="start"  style="width:300px;height:50px;">
+    <p>SCORE:<span id="score" >0</span></p>
+    <p>COUNTDOWN: <span id="timeleft" >30</span> 秒</p>
+    <div id="game"></div>
+    <script src="./jquery-3.4.1.min.js"></script>
+    <script>
+        $(function(){
+            // 判斷是否在遊戲中
+            let isgame = false;
+
+            // 點開始按鈕時
+            $("#start").on("click", function(){
+                // 清空場上所有殭屍
+                $(".zb").remove();
+
+                // 設定分數為0
+                let score = 0;
+
+                // 設定剩餘時間為0
+                let gametime = 30;
+
+                // 停用開始按鈕
+                $(this).attr("disabled", true);
+
+                // 設定分數和時間文字
+                $("#score").text(score);
+                $("#timeleft").text(gametime);
+
+                // 遊戲計時器
+                let gametimer = setInterval(game, 1000);
+
+                // 設定在遊戲中
+                isgame = true;
+
+                // 每0.2秒生一次殭屍
+                let zbtimer = setInterval(spawnZb, 200);
+
+                // 設定殭屍id
+                let zbid = 0;
+
+                // 每秒生一次殭屍
+                function spawnZb(){
+                    // 隨機0到10的數字
+                    let num = rand(10);
+                    // 如果數字大於2，生殭屍
+                    if(num > 2){
+                        $("#game").append(`<img src="./img/1.png" class="zb" id="zb${zbid}">`);
+                        $(`#zb${zbid}`).css("left", rand(50)+"%");
+                        $(`#zb${zbid}`).css("top", rand(90)+"%");
+                        movezb(zbid);
+                        zbid++;
+                    }
+                }
+
+                // 移動殭屍
+                function movezb(id){
+                    $(`#zb${id}`).animate({left: rand(90)+"%", top: rand(90)+"%"}, 3000, function(){
+                        movezb(id);
+                    });
+                }
+
+                // 隨機 0 到 num 的數字
+                function rand(num){
+                    return Math.floor( Math.random()*num );
+                }
+
+                // 遊戲計時器
+                function game(){
+                    // 減一秒
+                    gametime--;
+                    $("#timeleft").text(gametime);
+                    // 如果目前時間等於0
+                    if(gametime == 0){
+                        // 跳出訊息
+                        setTimeout(function(){alert("TIME'S UP!")}, 100);
+                        // 不在遊戲中
+                        isgame = false;
+                        // 停止殭屍移動
+                        $(".zb").stop();
+                        // 清除遊戲計時器和殭屍計時器
+                        clearInterval(gametimer);
+                        clearInterval(zbtimer);
+                        // 啟用開始按鈕
+                        $("#start").attr("disabled", false)
+                    }
+                }
+
+                // 當點殭屍時
+                $("#game").on("click", ".zb", function(){
+                    // 如果在遊戲中
+                    if(isgame){
+                        // 換圖片
+                        $(this).attr("src", "./img/2.png");
+                        // 忽略滑鼠點擊這個物件，讓滑鼠能點到被他蓋住的東西
+                        $(this).css("pointer-events", "none");
+                        // 停止移動
+                        $(this).stop();
+                        // 分數加一分
+                        score++;
+                        $("#score").text(score);
+                    }
+                })
+            })
+        })
+    </script>
+</body>
+</html>
